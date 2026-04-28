@@ -137,7 +137,7 @@ class StreamingService @Inject constructor(
 
         val httpRequest = Request.Builder()
             .url(ANTHROPIC_URL)
-            .addHeader("Authorization", "Bearer $apiKey")
+            .addHeader("x-api-key", apiKey)
             .addHeader("anthropic-version", ANTHROPIC_VERSION)
             .addHeader("Content-Type", "application/json")
             .post(body)

@@ -4,9 +4,9 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Surface
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavType
@@ -14,6 +14,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.thaibanai.multillmchat.data.local.SecureStorage
 import com.thaibanai.multillmchat.ui.screens.chat.ChatScreen
 import com.thaibanai.multillmchat.ui.screens.conversations.ConversationsScreen
 import com.thaibanai.multillmchat.ui.screens.settings.SettingsScreen
@@ -37,7 +38,12 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             val themeViewModel: ThemeViewModel = hiltViewModel()
-            val isDarkTheme = themeViewModel.isDarkTheme
+            val systemDark = isSystemInDarkTheme()
+            val isDarkTheme = when (themeViewModel.themeMode) {
+                SecureStorage.THEME_DARK -> true
+                SecureStorage.THEME_LIGHT -> false
+                else -> systemDark
+            }
 
             MultiLLMTheme(darkTheme = isDarkTheme) {
                 val navController = rememberNavController()

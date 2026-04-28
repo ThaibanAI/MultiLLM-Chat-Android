@@ -25,6 +25,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
@@ -491,9 +492,11 @@ fun MessageBubble(
                             }
                         } else {
                             // Render markdown using MarkdownView
+                            val isDarkTheme = MaterialTheme.colorScheme.background.luminance() < 0.5f
                             MarkdownView(
                                 markdown = message.content,
-                                modifier = Modifier.fillMaxWidth()
+                                modifier = Modifier.fillMaxWidth(),
+                                isDarkTheme = isDarkTheme
                             )
                         }
                     }

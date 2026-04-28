@@ -47,6 +47,7 @@ class ChatViewModel @Inject constructor(
             viewModelScope.launch {
                 val newId = repository.createNewConversation("New Chat")
                 _uiState.update { it.copy(conversationId = newId, conversationTitle = "New Chat") }
+                loadMessages(newId)
                 loadProviderStatuses()
             }
         } else {
@@ -203,8 +204,10 @@ class ChatViewModel @Inject constructor(
             val userMessage = repository.saveUserMessage(conversationId, text, state.pendingAttachments)
             val attachments = state.pendingAttachments.toList()
 
-            // Get existing messages for context
+            // Get conversation history, excluding the just-saved user message so the
+            // request builders can append it with attachments themselves (avoids duplication).
             val existingMessages = repository.getMessages(conversationId).first()
+                .filter { it.id != userMessage.id }
 
             // For each selected provider, create an assistant message and start streaming
             for ((index, provider) in selectedProviders.withIndex()) {

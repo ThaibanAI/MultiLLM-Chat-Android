@@ -4,6 +4,9 @@ import android.content.Context
 import android.content.SharedPreferences
 import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKeys
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -16,6 +19,8 @@ class SecureStorage @Inject constructor(
     context: Context
 ) {
     private val prefs: SharedPreferences
+    private val _themeModeFlow = MutableStateFlow(THEME_SYSTEM)
+    val themeModeFlow: StateFlow<String> = _themeModeFlow.asStateFlow()
 
     init {
         val masterKeyAlias = MasterKeys.getOrCreate(MasterKeys.AES256_GCM_SPEC)
@@ -26,6 +31,7 @@ class SecureStorage @Inject constructor(
             EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
             EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
         )
+        _themeModeFlow.value = getThemeMode()
     }
 
     // Anthropic
@@ -54,7 +60,10 @@ class SecureStorage @Inject constructor(
 
     // Theme
     fun getThemeMode(): String = prefs.getString(KEY_THEME_MODE, THEME_SYSTEM) ?: THEME_SYSTEM
-    fun setThemeMode(mode: String) = prefs.edit().putString(KEY_THEME_MODE, mode).apply()
+    fun setThemeMode(mode: String) {
+        prefs.edit().putString(KEY_THEME_MODE, mode).apply()
+        _themeModeFlow.value = mode
+    }
 
     fun clearAll() {
         prefs.edit().clear().apply()
