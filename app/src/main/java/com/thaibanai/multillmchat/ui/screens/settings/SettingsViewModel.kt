@@ -6,7 +6,6 @@ import com.thaibanai.multillmchat.data.local.SecureStorage
 import com.thaibanai.multillmchat.data.remote.model.LLMProvider
 import com.thaibanai.multillmchat.data.repository.ChatRepository
 import com.thaibanai.multillmchat.domain.model.ProviderConfigState
-import com.thaibanai.multillmchat.ui.theme.ThemeViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
@@ -25,7 +24,7 @@ data class SettingsUiState(
 @HiltViewModel
 class SettingsViewModel @Inject constructor(
     private val repository: ChatRepository,
-    private val themeViewModel: ThemeViewModel
+    private val secureStorage: SecureStorage
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(SettingsUiState())
@@ -96,7 +95,7 @@ class SettingsViewModel @Inject constructor(
 
     fun setThemeMode(mode: String) {
         _uiState.update { it.copy(themeMode = mode) }
-        themeViewModel.setThemeMode(mode)
+        secureStorage.setThemeMode(mode)
         repository.setThemeMode(mode)
     }
 
@@ -106,7 +105,7 @@ class SettingsViewModel @Inject constructor(
             repository.saveProviderConfig(_uiState.value.openAiConfig)
             repository.saveProviderConfig(_uiState.value.deepSeekConfig)
             repository.setThemeMode(_uiState.value.themeMode)
-            themeViewModel.setThemeMode(_uiState.value.themeMode)
+            secureStorage.setThemeMode(_uiState.value.themeMode)
         }
     }
 
