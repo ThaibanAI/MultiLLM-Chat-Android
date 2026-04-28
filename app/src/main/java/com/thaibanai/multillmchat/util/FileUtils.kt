@@ -93,7 +93,7 @@ object FileUtils {
     fun extractPdfText(context: Context, uri: Uri): String? {
         return try {
             val bytes = readBytes(context, uri) ?: return null
-            val pdfDocument = com.tom_roush.pdfbox.android.PDFBoxResourceLoader.init(context)
+            com.tom_roush.pdfbox.android.PDFBoxResourceLoader.init(context)
             val document = com.tom_roush.pdfbox.pdmodel.PDDocument.load(bytes)
             val stripper = com.tom_roush.pdfbox.text.PDFTextStripper()
             val text = stripper.getText(document)

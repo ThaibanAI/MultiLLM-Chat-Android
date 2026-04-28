@@ -101,7 +101,8 @@ data class AnthropicStreamEvent(
     val delta: AnthropicDelta? = null,
     val content_block: AnthropicContentBlock? = null,
     val index: Int? = null,
-    val message: AnthropicResponse? = null
+    val message: AnthropicResponse? = null,
+    val error: AnthropicErrorResponse? = null
 )
 
 data class AnthropicDelta(

@@ -37,7 +37,7 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             val themeViewModel: ThemeViewModel = hiltViewModel()
-            val isDarkTheme by themeViewModel.isDarkTheme.collectAsState()
+            val isDarkTheme = themeViewModel.isDarkTheme
 
             MultiLLMTheme(darkTheme = isDarkTheme) {
                 val navController = rememberNavController()
