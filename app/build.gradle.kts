@@ -53,6 +53,13 @@ android {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
         }
     }
+
+    configurations.all {
+        resolutionStrategy {
+            // Force a single version of JetBrains annotations to avoid duplicate class conflicts
+            force("org.jetbrains:annotations:23.0.0")
+        }
+    }
 }
 
 dependencies {
