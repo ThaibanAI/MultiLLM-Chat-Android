@@ -116,7 +116,9 @@ dependencies {
     implementation("androidx.datastore:datastore-preferences:1.1.1")
 
     // PDF text extraction
-    implementation("com.tom-roush:pdfbox-android:2.0.27.0")
+    implementation("com.tom-roush:pdfbox-android:2.0.27.0") {
+        exclude(group = "org.jetbrains", module = "annotations")
+    }
 
     // WorkManager for background tasks
     implementation("androidx.work:work-runtime-ktx:2.10.0")
