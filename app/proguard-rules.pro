@@ -39,6 +39,12 @@
 -keep class com.thaibanai.multillmchat.data.remote.model.** { *; }
 -keep class com.thaibanai.multillmchat.domain.model.** { *; }
 
+# Ignore warnings for release builds (handles optional PDFBox JPX classes)
+-ignorewarnings
+
+# Missing classes for PDFBox JPX support (optional)
+-dontwarn com.gemalto.jp2.**
+
 # Kotlin Coroutines
 -keepnames class kotlinx.coroutines.internal.MainDispatcherFactory {}
 -keepnames class kotlinx.coroutines.CoroutineExceptionHandler {}
