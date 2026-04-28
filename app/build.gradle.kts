@@ -54,12 +54,16 @@ android {
         }
     }
 
-    configurations.all {
+configurations {
+    all {
         resolutionStrategy {
-            // Force a single version of JetBrains annotations to avoid duplicate class conflicts
             force("org.jetbrains:annotations:23.0.0")
         }
     }
+    implementation {
+        exclude(group = "org.jetbrains", module = "annotations-java5")
+    }
+}
 }
 
 dependencies {
