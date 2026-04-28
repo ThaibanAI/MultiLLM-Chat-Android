@@ -42,6 +42,7 @@ import com.thaibanai.multillmchat.util.TempFileUtil
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ChatScreen(
+    conversationId: String? = null,
     onBackClick: () -> Unit,
     onSettingsClick: () -> Unit,
     onNavigateToConversations: () -> Unit,
@@ -51,6 +52,11 @@ fun ChatScreen(
     val context = LocalContext.current
     val listState = rememberLazyListState()
     val snackbarHostState = remember { SnackbarHostState() }
+
+    // Initialize with conversation ID once
+    LaunchedEffect(conversationId) {
+        viewModel.initialize(conversationId)
+    }
 
     // Image picker
     val imagePickerLauncher = rememberLauncherForActivityResult(
@@ -73,13 +79,6 @@ fun ChatScreen(
         bitmap?.let {
             val tempUri = TempFileUtil.saveBitmapToCache(context, it)
             tempUri?.let { uri -> viewModel.addImageAttachment(uri) }
-        }
-    }
-
-    // Navigate to conversations if no conversationId
-    LaunchedEffect(uiState.conversationId) {
-        if (uiState.conversationId == null) {
-            onNavigateToConversations()
         }
     }
 
