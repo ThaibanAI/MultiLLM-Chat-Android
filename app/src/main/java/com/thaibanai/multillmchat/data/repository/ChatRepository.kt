@@ -372,10 +372,16 @@ class ChatRepository @Inject constructor(
             )
         }
 
+        // Reasoning models (GPT-5.5, GPT-5.4) require reasoning_effort, not temperature
+        val isReasoningModel = model.startsWith("gpt-5")
+
         return OpenAIRequest(
             model = model,
             messages = messages,
-            stream = true
+            stream = true,
+            max_tokens = 4096,
+            temperature = if (isReasoningModel) null else 0.7,
+            reasoningEffort = if (isReasoningModel) "medium" else null
         )
     }
 

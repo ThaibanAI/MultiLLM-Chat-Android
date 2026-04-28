@@ -9,7 +9,9 @@ data class OpenAIRequest(
     val messages: List<OpenAIMessage>,
     val stream: Boolean = true,
     val max_tokens: Int = 4096,
-    val temperature: Double = 0.7
+    val temperature: Double? = null,
+    @SerializedName("reasoning_effort")
+    val reasoningEffort: String? = null
 )
 
 data class OpenAIMessage(

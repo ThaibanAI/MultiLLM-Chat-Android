@@ -35,6 +35,27 @@ class StreamingService @Inject constructor(
         private const val OPENAI_URL = "https://api.openai.com/v1/chat/completions"
         private const val DEEPSEEK_URL = "https://api.deepseek.com/chat/completions"
         private const val ANTHROPIC_VERSION = "2023-06-01"
+
+        private fun parseErrorBody(response: Response): String {
+            val bodyStr = response.body?.string()
+            if (!bodyStr.isNullOrBlank()) {
+                return try {
+                    val map = Gson().fromJson(bodyStr, Map::class.java)
+                    val err = map["error"]
+                    when (err) {
+                        is Map<*, *> -> {
+                            val msg = err["message"] ?: err["type"] ?: err
+                            "HTTP ${response.code}: $msg"
+                        }
+                        is String -> "HTTP ${response.code}: $err"
+                        else -> "HTTP ${response.code}: $bodyStr"
+                    }
+                } catch (e: Exception) {
+                    "HTTP ${response.code}: ${response.message}"
+                }
+            }
+            return "HTTP ${response.code}: ${response.message}"
+        }
     }
 
     fun streamOpenAI(request: OpenAIRequest, apiKey: String): Flow<StreamEvent> = callbackFlow {
@@ -47,7 +68,6 @@ class StreamingService @Inject constructor(
             .post(body)
             .build()
 
-        val factory = EventSources.createFactory(openAiClient)
         val fullText = StringBuilder()
 
         val listener = object : EventSourceListener() {
@@ -63,6 +83,11 @@ class StreamingService @Inject constructor(
                 }
                 try {
                     val response = gson.fromJson(data, OpenAIResponse::class.java)
+                    if (response.error != null) {
+                        trySend(StreamEvent.Error("HTTP 400: ${response.error.message}"))
+                        channel.close()
+                        return
+                    }
                     val delta = response.choices?.firstOrNull()?.delta?.content
                     if (!delta.isNullOrBlank()) {
                         fullText.append(delta)
@@ -80,7 +105,7 @@ class StreamingService @Inject constructor(
             ) {
                 val errorMsg = when {
                     t != null -> "Network error: ${t.message}"
-                    response != null -> "HTTP ${response.code}: ${response.message}"
+                    response != null -> parseErrorBody(response)
                     else -> "Unknown error"
                 }
                 trySend(StreamEvent.Error(errorMsg))
@@ -99,7 +124,7 @@ class StreamingService @Inject constructor(
             }
         }
 
-        factory.newEventSource(httpRequest, listener)
+        EventSources.createFactory(openAiClient).newEventSource(httpRequest, listener)
 
         awaitClose {
             // Cleanup handled by OkHttp
@@ -118,7 +143,6 @@ class StreamingService @Inject constructor(
             .post(body)
             .build()
 
-        val factory = EventSources.createFactory(anthropicClient)
         val fullText = StringBuilder()
 
         val listener = object : EventSourceListener() {
@@ -192,7 +216,7 @@ class StreamingService @Inject constructor(
             }
         }
 
-        factory.newEventSource(httpRequest, listener)
+        EventSources.createFactory(anthropicClient).newEventSource(httpRequest, listener)
 
         awaitClose { }
     }
@@ -207,7 +231,6 @@ class StreamingService @Inject constructor(
             .post(body)
             .build()
 
-        val factory = EventSources.createFactory(deepSeekClient)
         val fullText = StringBuilder()
 
         val listener = object : EventSourceListener() {
@@ -223,6 +246,11 @@ class StreamingService @Inject constructor(
                 }
                 try {
                     val response = gson.fromJson(data, DeepSeekResponse::class.java)
+                    if (response.error != null) {
+                        trySend(StreamEvent.Error("API error: ${response.error.message}"))
+                        channel.close()
+                        return
+                    }
                     val delta = response.choices?.firstOrNull()?.delta?.content
                     if (!delta.isNullOrBlank()) {
                         fullText.append(delta)
@@ -240,7 +268,7 @@ class StreamingService @Inject constructor(
             ) {
                 val errorMsg = when {
                     t != null -> "Network error: ${t.message}"
-                    response != null -> "HTTP ${response.code}: ${response.message}"
+                    response != null -> parseErrorBody(response)
                     else -> "Unknown error"
                 }
                 trySend(StreamEvent.Error(errorMsg))
@@ -255,7 +283,7 @@ class StreamingService @Inject constructor(
             }
         }
 
-        factory.newEventSource(httpRequest, listener)
+        EventSources.createFactory(deepSeekClient).newEventSource(httpRequest, listener)
 
         awaitClose { }
     }
