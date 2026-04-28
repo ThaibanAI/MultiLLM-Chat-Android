@@ -26,7 +26,7 @@ sealed class Screen(val route: String) {
     }
     data object Conversations : Screen("conversations")
     data object Settings : Screen("settings")
-    data object NewChat : Screen("chat/new")
+    data object NewChat : Screen("new-chat")
 }
 
 @AndroidEntryPoint

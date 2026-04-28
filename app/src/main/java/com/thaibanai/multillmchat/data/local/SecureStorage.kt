@@ -76,8 +76,8 @@ class SecureStorage @Inject constructor(
         const val THEME_DARK = "dark"
         const val THEME_SYSTEM = "system"
 
-        const val DEFAULT_CLAUDE_MODEL = "claude-sonnet-4-20250514"
-        const val DEFAULT_OPENAI_MODEL = "gpt-4o"
-        const val DEFAULT_DEEPSEEK_MODEL = "deepseek-chat"
+        const val DEFAULT_CLAUDE_MODEL = "claude-opus-4-7"
+        const val DEFAULT_OPENAI_MODEL = "gpt-5.5"
+        const val DEFAULT_DEEPSEEK_MODEL = "deepseek-v4-pro"
     }
 }
