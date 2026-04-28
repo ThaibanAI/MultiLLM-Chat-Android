@@ -66,7 +66,7 @@ data class AnthropicRequest(
     val maxTokens: Int = 4096,
     val messages: List<AnthropicMessage>,
     val stream: Boolean = true,
-    val temperature: Double = 0.7
+    val temperature: Double? = null
 )
 
 data class AnthropicMessage(
