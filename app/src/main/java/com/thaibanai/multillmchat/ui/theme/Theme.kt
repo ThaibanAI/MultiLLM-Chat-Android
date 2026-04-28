@@ -1,0 +1,87 @@
+package com.thaibanai.multillmchat.ui.theme
+
+import android.app.Activity
+import android.os.Build
+import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.material3.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.SideEffect
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.platform.LocalView
+import androidx.core.view.WindowCompat
+
+// Provider colors
+val ClaudeOrange = Color(0xFFD97757)
+val ClaudeOrangeDark = Color(0xFFE8A87C)
+val OpenAiGreen = Color(0xFF75A99C)
+val OpenAiGreenDark = Color(0xFF97C1B5)
+val DeepSeekBlue = Color(0xFF4F6F8F)
+val DeepSeekBlueDark = Color(0xFF7A9BBF)
+
+private val LightColorScheme = lightColorScheme(
+    primary = Color(0xFF1A73E8),
+    onPrimary = Color.White,
+    primaryContainer = Color(0xFFD3E3FD),
+    onPrimaryContainer = Color(0xFF041E49),
+    secondary = Color(0xFF5F6368),
+    onSecondary = Color.White,
+    secondaryContainer = Color(0xFFE8EAED),
+    onSecondaryContainer = Color(0xFF3C4043),
+    tertiary = ClaudeOrange,
+    background = Color(0xFFF8F9FA),
+    onBackground = Color(0xFF202124),
+    surface = Color.White,
+    onSurface = Color(0xFF202124),
+    surfaceVariant = Color(0xFFF1F3F4),
+    onSurfaceVariant = Color(0xFF5F6368),
+    outline = Color(0xFFDADCE0),
+    outlineVariant = Color(0xFFE8EAED),
+    error = Color(0xFFD93025),
+    onError = Color.White
+)
+
+private val DarkColorScheme = darkColorScheme(
+    primary = Color(0xFF8AB4F8),
+    onPrimary = Color(0xFF062E6F),
+    primaryContainer = Color(0xFF0842A0),
+    onPrimaryContainer = Color(0xFFD3E3FD),
+    secondary = Color(0xFF9AA0A6),
+    onSecondary = Color(0xFF1F1F1F),
+    secondaryContainer = Color(0xFF303134),
+    onSecondaryContainer = Color(0xFFE8EAED),
+    tertiary = ClaudeOrangeDark,
+    background = Color(0xFF1F1F1F),
+    onBackground = Color(0xFFE8EAED),
+    surface = Color(0xFF2D2D2D),
+    onSurface = Color(0xFFE8EAED),
+    surfaceVariant = Color(0xFF3C4043),
+    onSurfaceVariant = Color(0xFF9AA0A6),
+    outline = Color(0xFF5F6368),
+    outlineVariant = Color(0xFF3C4043),
+    error = Color(0xFFF28B82),
+    onError = Color(0xFF601410)
+)
+
+@Composable
+fun MultiLLMTheme(
+    darkTheme: Boolean = isSystemInDarkTheme(),
+    content: @Composable () -> Unit
+) {
+    val colorScheme = if (darkTheme) DarkColorScheme else LightColorScheme
+
+    val view = LocalView.current
+    if (!view.isInEditMode) {
+        SideEffect {
+            val window = (view.context as Activity).window
+            window.statusBarColor = colorScheme.surface.toArgb()
+            WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = !darkTheme
+        }
+    }
+
+    MaterialTheme(
+        colorScheme = colorScheme,
+        typography = Typography(),
+        content = content
+    )
+}
