@@ -245,27 +245,28 @@ class ChatViewModel @Inject constructor(
 
                 // Start streaming
                 val streamJob = launch(Dispatchers.IO) {
-                    buildString {
-                        repository.sendToProvider(provider, text, existingMessages, filteredAttachments)
-                            .catch { e ->
-                                repository.failMessage(assistantMsg.id, e.message ?: "Unknown error")
-                            }
-                            .collect { event ->
-                                when (event) {
-                                    is StreamEvent.Delta -> {
-                                        append(event.text)
-                                        repository.updateStreamingMessage(assistantMsg.id, toString())
-                                    }
-                                    is StreamEvent.Complete -> {
-                                        append(event.fullText)
-                                        repository.completeMessage(assistantMsg.id, toString())
-                                    }
-                                    is StreamEvent.Error -> {
-                                        repository.failMessage(assistantMsg.id, event.message)
-                                    }
+                    val sb = StringBuilder()
+                    repository.sendToProvider(provider, text, existingMessages, filteredAttachments)
+                        .catch { e ->
+                            repository.failMessage(assistantMsg.id, e.message ?: "Unknown error")
+                        }
+                        .collect { event ->
+                            when (event) {
+                                is StreamEvent.Delta -> {
+                                    sb.append(event.text)
+                                    repository.updateStreamingMessage(assistantMsg.id, sb.toString())
+                                }
+                                is StreamEvent.Complete -> {
+                                    // Use the event's fullText directly (avoids double/triple
+                                    // accumulation from buildString + duplicate Complete events
+                                    // from onClosed firing after [DONE]/message_stop)
+                                    repository.completeMessage(assistantMsg.id, event.fullText)
+                                }
+                                is StreamEvent.Error -> {
+                                    repository.failMessage(assistantMsg.id, event.message)
                                 }
                             }
-                    }
+                        }
                 }
                 streamJobs[assistantMsg.id] = streamJob
             }
@@ -309,27 +310,25 @@ class ChatViewModel @Inject constructor(
                 }
 
                 launch(Dispatchers.IO) {
-                    buildString {
-                        repository.sendToProvider(provider, messageContent, existingMessages, emptyList())
-                            .catch { e ->
-                                repository.failMessage(assistantMsg.id, e.message ?: "Unknown error")
-                            }
-                            .collect { event ->
-                                when (event) {
-                                    is StreamEvent.Delta -> {
-                                        append(event.text)
-                                        repository.updateStreamingMessage(assistantMsg.id, toString())
-                                    }
-                                    is StreamEvent.Complete -> {
-                                        append(event.fullText)
-                                        repository.completeMessage(assistantMsg.id, toString())
-                                    }
-                                    is StreamEvent.Error -> {
-                                        repository.failMessage(assistantMsg.id, event.message)
-                                    }
+                    val sb = StringBuilder()
+                    repository.sendToProvider(provider, messageContent, existingMessages, emptyList())
+                        .catch { e ->
+                            repository.failMessage(assistantMsg.id, e.message ?: "Unknown error")
+                        }
+                        .collect { event ->
+                            when (event) {
+                                is StreamEvent.Delta -> {
+                                    sb.append(event.text)
+                                    repository.updateStreamingMessage(assistantMsg.id, sb.toString())
+                                }
+                                is StreamEvent.Complete -> {
+                                    repository.completeMessage(assistantMsg.id, event.fullText)
+                                }
+                                is StreamEvent.Error -> {
+                                    repository.failMessage(assistantMsg.id, event.message)
                                 }
                             }
-                    }
+                        }
                 }
             }
         }
