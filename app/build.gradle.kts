@@ -102,9 +102,8 @@ dependencies {
     implementation("io.noties.markwon:html:4.6.2")
     implementation("io.noties.markwon:syntax-highlight:4.6.2")
 
-    // Code highlight (PRISM4J)
-    implementation("com.aliucord:prism4j:2.1.0")
-    implementation("com.aliucord:prism4j-bundler:2.1.0")
+    // Code highlight via Markwon syntax highlight (no external prism4j dependency)
+    // Syntax highlighting handled via WebView + CSS in MarkdownRenderer
 
     // Coil for image loading
     implementation("io.coil-kt:coil-compose:2.7.0")
