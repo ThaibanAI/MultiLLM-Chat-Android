@@ -8,7 +8,11 @@ data class OpenAIRequest(
     val model: String,
     val messages: List<OpenAIMessage>,
     val stream: Boolean = true,
-    val max_tokens: Int = 4096,
+    // For non-reasoning models (gpt-4o, etc.)
+    val max_tokens: Int? = null,
+    // For reasoning models (gpt-5.x)
+    @SerializedName("max_completion_tokens")
+    val maxCompletionTokens: Int? = null,
     val temperature: Double? = null,
     @SerializedName("reasoning_effort")
     val reasoningEffort: String? = null

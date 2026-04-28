@@ -176,18 +176,18 @@ class ChatRepository @Inject constructor(
     fun saveProviderConfig(config: ProviderConfigState) {
         when (config.provider) {
             LLMProvider.CLAUDE -> {
-                secureStorage.setAnthropicApiKey(config.apiKey)
-                secureStorage.setAnthropicModel(config.model)
+                secureStorage.setAnthropicApiKey(config.apiKey.trim())
+                secureStorage.setAnthropicModel(config.model.trim())
                 secureStorage.setAnthropicEnabled(config.isEnabled)
             }
             LLMProvider.OPENAI -> {
-                secureStorage.setOpenAiApiKey(config.apiKey)
-                secureStorage.setOpenAiModel(config.model)
+                secureStorage.setOpenAiApiKey(config.apiKey.trim())
+                secureStorage.setOpenAiModel(config.model.trim())
                 secureStorage.setOpenAiEnabled(config.isEnabled)
             }
             LLMProvider.DEEPSEEK -> {
-                secureStorage.setDeepSeekApiKey(config.apiKey)
-                secureStorage.setDeepSeekModel(config.model)
+                secureStorage.setDeepSeekApiKey(config.apiKey.trim())
+                secureStorage.setDeepSeekModel(config.model.trim())
                 secureStorage.setDeepSeekEnabled(config.isEnabled)
             }
         }
@@ -202,9 +202,9 @@ class ChatRepository @Inject constructor(
         attachments: List<PendingAttachment> = emptyList()
     ): Flow<StreamEvent> {
         val apiKey = when (provider) {
-            LLMProvider.CLAUDE -> secureStorage.getAnthropicApiKey()
-            LLMProvider.OPENAI -> secureStorage.getOpenAiApiKey()
-            LLMProvider.DEEPSEEK -> secureStorage.getDeepSeekApiKey()
+            LLMProvider.CLAUDE -> secureStorage.getAnthropicApiKey()?.trim()
+            LLMProvider.OPENAI -> secureStorage.getOpenAiApiKey()?.trim()
+            LLMProvider.DEEPSEEK -> secureStorage.getDeepSeekApiKey()?.trim()
         }
 
         if (apiKey.isNullOrBlank()) {
@@ -372,14 +372,16 @@ class ChatRepository @Inject constructor(
             )
         }
 
-        // Reasoning models (GPT-5.5, GPT-5.4) require reasoning_effort, not temperature
+        // Reasoning models (GPT-5.x) require reasoning_effort and max_completion_tokens,
+        // NOT max_tokens or temperature
         val isReasoningModel = model.startsWith("gpt-5")
 
         return OpenAIRequest(
             model = model,
             messages = messages,
             stream = true,
-            max_tokens = 4096,
+            max_tokens = if (isReasoningModel) null else 4096,
+            maxCompletionTokens = if (isReasoningModel) 4096 else null,
             temperature = if (isReasoningModel) null else 0.7,
             reasoningEffort = if (isReasoningModel) "medium" else null
         )

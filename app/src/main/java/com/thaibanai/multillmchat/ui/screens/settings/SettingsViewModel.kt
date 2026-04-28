@@ -46,11 +46,11 @@ class SettingsViewModel @Inject constructor(
     }
 
     fun updateClaudeApiKey(key: String) {
-        _uiState.update { it.copy(claudeConfig = it.claudeConfig.copy(apiKey = key)) }
+        _uiState.update { it.copy(claudeConfig = it.claudeConfig.copy(apiKey = key.trim())) }
     }
 
     fun updateClaudeModel(model: String) {
-        _uiState.update { it.copy(claudeConfig = it.claudeConfig.copy(model = model)) }
+        _uiState.update { it.copy(claudeConfig = it.claudeConfig.copy(model = model.trim())) }
     }
 
     fun updateClaudeEnabled(enabled: Boolean) {
@@ -58,11 +58,11 @@ class SettingsViewModel @Inject constructor(
     }
 
     fun updateOpenAiApiKey(key: String) {
-        _uiState.update { it.copy(openAiConfig = it.openAiConfig.copy(apiKey = key)) }
+        _uiState.update { it.copy(openAiConfig = it.openAiConfig.copy(apiKey = key.trim())) }
     }
 
     fun updateOpenAiModel(model: String) {
-        _uiState.update { it.copy(openAiConfig = it.openAiConfig.copy(model = model)) }
+        _uiState.update { it.copy(openAiConfig = it.openAiConfig.copy(model = model.trim())) }
     }
 
     fun updateOpenAiEnabled(enabled: Boolean) {
@@ -70,11 +70,11 @@ class SettingsViewModel @Inject constructor(
     }
 
     fun updateDeepSeekApiKey(key: String) {
-        _uiState.update { it.copy(deepSeekConfig = it.deepSeekConfig.copy(apiKey = key)) }
+        _uiState.update { it.copy(deepSeekConfig = it.deepSeekConfig.copy(apiKey = key.trim())) }
     }
 
     fun updateDeepSeekModel(model: String) {
-        _uiState.update { it.copy(deepSeekConfig = it.deepSeekConfig.copy(model = model)) }
+        _uiState.update { it.copy(deepSeekConfig = it.deepSeekConfig.copy(model = model.trim())) }
     }
 
     fun updateDeepSeekEnabled(enabled: Boolean) {
