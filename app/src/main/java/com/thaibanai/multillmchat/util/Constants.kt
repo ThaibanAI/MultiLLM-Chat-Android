@@ -1,7 +1,7 @@
 package com.thaibanai.multillmchat.util
 
 object Constants {
-    const val APP_VERSION = "1.0.0"
+    const val APP_VERSION = "1.0.5"
     const val GITHUB_URL = "https://github.com/ThaibanAI/MultiLLM-Chat-Android"
 
     // Suggestion models — updated Apr 2026

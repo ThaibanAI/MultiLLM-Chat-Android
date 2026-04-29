@@ -28,9 +28,11 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
@@ -142,60 +144,65 @@ fun ChatScreen(
             )
         }
     ) { padding ->
-        if (uiState.messages.isEmpty() && !uiState.isLoading) {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(padding),
-                contentAlignment = Alignment.Center
-            ) {
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Icon(
-                        Icons.Outlined.Chat,
-                        contentDescription = null,
-                        modifier = Modifier.size(64.dp),
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                    Spacer(Modifier.height(16.dp))
-                    Text(
-                        "Send a message to start",
-                        style = MaterialTheme.typography.titleMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                    Spacer(Modifier.height(8.dp))
-                    Text(
-                        "Select one or more providers above\nthe input field",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
+        // Apply IME (keyboard) padding so content is pushed above the keyboard
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(padding)
+                .imePadding()
+                .navigationBarsPadding()
+        ) {
+            if (uiState.messages.isEmpty() && !uiState.isLoading) {
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Icon(
+                            Icons.Outlined.Chat,
+                            contentDescription = null,
+                            modifier = Modifier.size(64.dp),
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                        Spacer(Modifier.height(16.dp))
+                        Text(
+                            "Send a message to start",
+                            style = MaterialTheme.typography.titleMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                        Spacer(Modifier.height(8.dp))
+                        Text(
+                            "Select one or more providers above\nthe input field",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
                 }
-            }
-        } else {
-            LazyColumn(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(padding),
-                state = listState,
-                contentPadding = PaddingValues(horizontal = 12.dp, vertical = 8.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                items(uiState.messages, key = { it.id }) { message ->
-                    MessageBubble(
-                        message = message,
-                        context = context,
-                        onCopy = { text ->
-                            val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-                            clipboard.setPrimaryClip(ClipData.newPlainText("message", text))
-                        },
-                        onDelete = { viewModel.deleteMessage(message.id) },
-                        onResend = {
-                            viewModel.resendToProviders(
-                                message.content,
-                                uiState.selectedProviders.toList(),
-                                emptyList()
-                            )
-                        }
-                    )
+            } else {
+                LazyColumn(
+                    modifier = Modifier.fillMaxSize(),
+                    state = listState,
+                    contentPadding = PaddingValues(horizontal = 12.dp, vertical = 8.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    items(uiState.messages, key = { it.id }) { message ->
+                        MessageBubble(
+                            message = message,
+                            context = context,
+                            onCopy = { text ->
+                                val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+                                clipboard.setPrimaryClip(ClipData.newPlainText("message", text))
+                            },
+                            onDelete = { viewModel.deleteMessage(message.id) },
+                            onResend = {
+                                viewModel.resendToProviders(
+                                    message.content,
+                                    uiState.selectedProviders.toList(),
+                                    emptyList()
+                                )
+                            }
+                        )
+                    }
                 }
             }
         }
@@ -246,6 +253,18 @@ fun ChatScreen(
             }
         }
     }
+}
+
+@Composable
+private fun isLandscape(): Boolean {
+    val configuration = LocalContext.current.resources.configuration
+    return configuration.screenWidthDp > configuration.screenHeightDp
+}
+
+@Composable
+private fun isTablet(): Boolean {
+    val widthDp = LocalContext.current.resources.configuration.screenWidthDp
+    return widthDp >= 600
 }
 
 @Composable
@@ -412,6 +431,12 @@ fun MessageBubble(
     onDelete: () -> Unit,
     onResend: () -> Unit
 ) {
+    // Wider bubbles in landscape/tablet, narrower in portrait phone
+    val maxBubbleWidth: Dp = if (isLandscape()) {
+        if (isTablet()) 480.dp else 380.dp
+    } else {
+        if (isTablet()) 480.dp else 300.dp
+    }
     var showMenu by remember { mutableStateOf(false) }
 
     if (message.role == MessageRole.USER) {
@@ -436,7 +461,7 @@ fun MessageBubble(
             Surface(
                 shape = RoundedCornerShape(topStart = 16.dp, topEnd = 4.dp, bottomStart = 16.dp, bottomEnd = 16.dp),
                 color = MaterialTheme.colorScheme.primaryContainer,
-                modifier = Modifier.widthIn(max = 300.dp).padding(start = 48.dp, bottom = 2.dp)
+                modifier = Modifier.widthIn(max = maxBubbleWidth).padding(start = 48.dp, bottom = 2.dp)
             ) {
                 Column(modifier = Modifier.padding(12.dp)) {
                     Text(text = message.content, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onPrimaryContainer)
@@ -475,10 +500,10 @@ fun MessageBubble(
             Surface(
                 shape = RoundedCornerShape(16.dp),
                 color = MaterialTheme.colorScheme.surfaceVariant,
-                modifier = Modifier.widthIn(max = 300.dp).padding(bottom = 2.dp)
+                modifier = Modifier.widthIn(max = maxBubbleWidth).padding(bottom = 2.dp)
             ) {
                 Column {
-                    Box(modifier = Modifier.padding(12.dp).widthIn(max = 300.dp)) {
+                    Box(modifier = Modifier.padding(12.dp).widthIn(max = maxBubbleWidth)) {
                         if (message.isLoading) {
                             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                                 CircularProgressIndicator(modifier = Modifier.size(16.dp), strokeWidth = 2.dp)

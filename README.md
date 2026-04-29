@@ -46,8 +46,9 @@ Send one prompt to **Claude**, **GPT-4o**, and **DeepSeek** at the same time and
 
 ### 🎨 UI
 - Jetpack Compose + Material Design 3 (Material You)
-- Responsive layout for phones and tablets
+- Responsive layout for phones, tablets, and landscape — adaptive bubble widths, keyboard-aware layout
 - Smooth animations and transitions
+- **Keyboard-aware** — input bar stays above the virtual keyboard; message list is pushed up with `imePadding()`
 
 ---
 
